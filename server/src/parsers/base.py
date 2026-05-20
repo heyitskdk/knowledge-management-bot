@@ -37,6 +37,35 @@ class Chunk:
     chunk_index: int
     metadata: dict[str, Any]
 
+    def for_embedding(self) -> str:
+        """
+        Text fed to the embedding model
+        - prepends the structural location (header path / page / slide / timestamp)
+        - retrieval model now sees 'where this chunk lives'
+        """
+        location = self._location_prefix()
+        if location:
+            return f"{location}\n\n{self.text}"
+        return self.text
+    
+    def for_llm(self) -> str:
+        """
+        Text provided to llm at answer generation
+        - currently identical to `text`
+        - reserved for richer formatting later(code fence etc.)
+        """
+        return self.text
+
+    def _location_prefix(self) -> str:
+        meta = self.metadata
+        if meta.get("header_path"):
+            return "# " + " > ".join(meta["header_path"])
+        if "page_number" in meta:
+            return f"Page {meta['page_number']}"
+        if "slide_number" in meta:
+            return f"Slide {meta['slide_number']}"
+        return ""
+
 
 ParserFn = Callable[[bytes, str], list[Chunk]]
 
