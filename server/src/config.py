@@ -15,4 +15,4 @@ class Settings(BaseSettings):
     )
 
 # module level singelton
-settings = Settings()
+settings = Settings() # type: ignore[call-arg]
